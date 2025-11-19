@@ -502,3 +502,8 @@ build/orca/orca/
 #Ignore Codacy's MCP server configuration and instruction files
 .github/instructions/codacy.instructions.md
 .codacy/**
+
+# Web UI specific
+web-ui/.env
+web-ui/temp/
+web-ui/client/build/
