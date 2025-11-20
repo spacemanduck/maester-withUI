@@ -49,6 +49,8 @@ cd web-ui
 2. Start the services:
 ```bash
 docker-compose up -d
+# Or use the local development configuration
+docker-compose -f docker-compose.local.yml up -d
 ```
 
 This will start:
@@ -56,6 +58,8 @@ This will start:
 - Maester Web UI on port 3001
 
 3. Access the application at `http://localhost:3001`
+
+> **Note:** For detailed Docker deployment instructions including Azure Container Apps, see [DOCKER-DEPLOYMENT.md](DOCKER-DEPLOYMENT.md)
 
 ### Option 2: Manual Setup
 
@@ -150,13 +154,21 @@ NODE_ENV=production
 
 ### Docker Deployment
 
-1. Build the Docker image:
-```bash
-docker build -t maester-web-ui .
-```
+Multiple Docker configurations are available:
+- `Dockerfile` - Production-ready (Ubuntu-based)
+- `Dockerfile.local` - Optimized for local development (Alpine-based)
+- `Dockerfile.azure` - Optimized for Azure Container Apps
 
-2. Run the container:
+#### Quick Build and Run
+
 ```bash
+# Build using the helper script
+./scripts/build-docker.sh --type production
+
+# Or build manually
+docker build -t maester-web-ui .
+
+# Run the container
 docker run -d \
   -p 3001:3001 \
   -e USE_AZURITE=false \
@@ -165,6 +177,8 @@ docker run -d \
   --name maester-web-ui \
   maester-web-ui
 ```
+
+> **See [DOCKER-DEPLOYMENT.md](DOCKER-DEPLOYMENT.md)** for comprehensive Docker deployment instructions, including Azure Container Apps deployment.
 
 ## API Endpoints
 

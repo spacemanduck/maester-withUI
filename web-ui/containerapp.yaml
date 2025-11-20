@@ -1,0 +1,67 @@
+# Azure Container Apps configuration file
+# Deploy with: az containerapp create --resource-group <rg> --yaml containerapp.yaml
+
+properties:
+  managedEnvironmentId: /subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.App/managedEnvironments/<environment-name>
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 3001
+      transport: http
+      allowInsecure: false
+      traffic:
+        - latestRevision: true
+          weight: 100
+    secrets: []
+    registries: []
+  template:
+    containers:
+      - name: maester-web-ui
+        image: <your-registry>.azurecr.io/maester-web-ui:latest
+        resources:
+          cpu: 1.0
+          memory: 2Gi
+        env:
+          - name: NODE_ENV
+            value: "production"
+          - name: USE_AZURITE
+            value: "false"
+          - name: STORAGE_ACCOUNT_NAME
+            value: "<your-storage-account-name>"
+          - name: STORAGE_CONTAINER_NAME
+            value: "maester-reports"
+          - name: PORT
+            value: "3001"
+          - name: ALLOWED_ORIGINS
+            value: "https://<your-app-name>.azurecontainerapps.io"
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /api/health
+              port: 3001
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          - type: Readiness
+            httpGet:
+              path: /api/health
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+    scale:
+      minReplicas: 1
+      maxReplicas: 3
+      rules:
+        - name: http-scaling
+          http:
+            metadata:
+              concurrentRequests: "10"
+  identity:
+    type: SystemAssigned
+tags:
+  app: maester-web-ui
+  environment: production

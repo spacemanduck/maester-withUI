@@ -2,6 +2,8 @@
 
 Get the Maester Web UI running in under 5 minutes!
 
+> **For detailed Docker deployments:** See [DOCKER-DEPLOYMENT.md](DOCKER-DEPLOYMENT.md) for comprehensive Docker and Azure Container Apps deployment instructions.
+
 ## Prerequisites
 
 - Docker and Docker Compose installed
