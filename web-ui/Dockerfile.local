@@ -38,7 +38,7 @@ ENV POWERSHELL_TELEMETRY_OPTOUT=1
 
 # Install PowerShell modules
 SHELL ["pwsh", "-NoLogo", "-NoProfile", "-Command"]
-RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+RUN if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default -InstallationPolicy Trusted } else { Set-PSRepository -Name PSGallery -InstallationPolicy Trusted }
 RUN Install-Module -Name Maester -Force -Scope AllUsers
 RUN Install-Module Pester -SkipPublisherCheck -Force -Scope AllUsers
 # Optional modules for enhanced functionality
