@@ -69,6 +69,12 @@ docker build -t maester-web-ui:latest .
 docker build -t myregistry.azurecr.io/maester-web-ui:v1.0.0 .
 ```
 
+**Note:** If you encounter npm timeout issues during the build (especially in CI/CD environments), try disabling BuildKit:
+
+```bash
+DOCKER_BUILDKIT=0 docker build -t maester-web-ui:latest .
+```
+
 ### Running Production Container
 
 ```bash

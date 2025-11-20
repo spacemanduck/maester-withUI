@@ -2,7 +2,7 @@
 # Optimized for production deployment with Ubuntu base (ARM64 compatible)
 
 # Stage 1: Build the React client
-FROM node:18-alpine AS client-build
+FROM node:20-alpine AS client-build
 WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm ci
@@ -13,21 +13,22 @@ RUN npm run build
 # Using Ubuntu for better Azure compatibility and ARM64 support
 FROM mcr.microsoft.com/powershell:7.4-ubuntu-22.04
 
+# Copy Node.js from the client-build stage
+COPY --from=client-build /usr/local/bin/node /usr/local/bin/node
+COPY --from=client-build /usr/local/lib/node_modules /usr/local/lib/node_modules
+# Create symlinks for npm, npx
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
 # Set PowerShell as default shell for module installation
 SHELL ["pwsh", "-NoLogo", "-NoProfile", "-Command"]
 
 # Speed up gallery installs + avoid prompts
 ENV POWERSHELL_TELEMETRY_OPTOUT=1
-RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+RUN if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default -InstallationPolicy Trusted } else { Set-PSRepository -Name PSGallery -InstallationPolicy Trusted }
 
-# Install Node.js 18.x
+# Switch back to bash shell
 SHELL ["/bin/bash", "-c"]
-RUN apt-get update && \
-    apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 # Create app directory
 WORKDIR /app
